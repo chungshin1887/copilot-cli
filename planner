@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>나만의 플래너</title>
+  <style>
+    :root{
+      --bg: #f5eaff;        /* 페이지 배경 */
+      --header: #d9b3ff;    /* 헤더 배경 */
+      --card: #fffafc;      /* 카드 배경 */
+      --accent: #b583ff;    /* 버튼 / 주요 색 */
+      --accent-2: #cfa0ff;  /* 포인트 */
+      --accent-dark: #8f5cff;/* hover */
+      --text: #2e1b3b;
+      --muted: #6b577a;
+    }
+
+    *{box-sizing: border-box}
+    body{
+      margin:0;
+      font-family: "Pretendard", "Noto Sans KR", system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+    }
+
+    header{
+      background: linear-gradient(90deg,var(--header),var(--accent-2));
+      padding: 28px 16px;
+      text-align: center;
+      border-bottom: 2px solid rgba(143,92,255,0.12);
+    }
+    header h1{
+      margin:0;
+      font-size:1.4rem;
+      color: #3b2350;
+      letter-spacing: -0.4px;
+    }
+    main{
+      max-width:760px;
+      margin:28px auto;
+      padding:20px;
+    }
+
+    .panel{
+      background: var(--card);
+      border-radius:14px;
+      padding:18px;
+      box-shadow: 0 6px 18px rgba(86,45,125,0.06);
+      border: 1px solid rgba(143,92,255,0.06);
+    }
+
+    .controls{
+      display:grid;
+      grid-template-columns: 1fr 120px;
+      gap:10px;
+    }
+    .controls .left{
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+      flex-direction:column;
+    }
+    label{font-weight:600;color:var(--muted);font-size:13px}
+    input[type="text"], textarea {
+      width:100%;
+      padding:10px 12px;
+      border-radius:10px;
+      border:1px solid rgba(143,92,255,0.12);
+      font-size:14px;
+      background: #fff;
+      color:var(--text);
+    }
+    textarea{ resize: vertical; min-height:64px; }
+
+    button.primary{
+      background:var(--accent);
+      color:white;
+      border:none;
+      padding:12px 14px;
+      border-radius:10px;
+      font-weight:700;
+      cursor:pointer;
+      transition: transform .12s ease, background-color .12s;
+      width:100%;
+    }
+    button.primary:hover{ background:var(--accent-dark); transform: translateY(-2px); }
+
+    .meta{
+      margin-top:12px;
+      font-size:13px;
+      color:var(--muted);
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+    }
+
+    #tasks{
+      margin-top:18px;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+    }
+
+    .task{
+      display:flex;
+      gap:12px;
+      align-items:flex-start;
+      background: linear-gradient(180deg,#ffffff,#fff9ff);
+      border-radius:12px;
+      padding:12px;
+      border:1px solid rgba(143,92,255,0.06);
+    }
+
+    .task .left{
+      display:flex;
+      gap:12px;
+      align-items:flex-start;
+      flex:1;
+    }
+
+    .task input[type="checkbox"]{
+      width:20px;height:20px;margin-top:4px;
+      accent-color: var(--accent);
+      cursor:pointer;
+    }
+
+    .task .content{
+      flex:1;
+    }
+    .task .title{
+      font-weight:700;
+      color:var(--text);
+      margin:0 0 6px 0;
+      font-size:15px;
+      word-break:break-word;
+    }
+    .task .desc{
+      margin:0;
+      color:var(--muted);
+      font-size:13px;
+      white-space:pre-wrap;
+    }
+    .task .meta{
+      margin-top:8px;
+      font-size:12px;
+      color:#8b7aa3;
+    }
+
+    .task .actions{
+      display:flex;
+      gap:8px;
+      align-items:center;
+      margin-left:8px;
+    }
+    .btn-icon{
+      border:none;
+      background:transparent;
+      cursor:pointer;
+      padding:6px;
+      border-radius:8px;
+    }
+    .btn-icon:hover{
+      background: rgba(143,92,255,0.07);
+    }
+    .delete{
+      color:#b84c6b;
+    }
+
+    .done .title{
+      text-decoration: line-through;
+      color:#9a86a8;
+      font-weight:700;
+    }
+    .done .desc{ color:#bbaed0; }
+
+    footer{
+      text-align:center;
+      margin-top:18px;
+      color:var(--muted);
+      font-size:13px;
+    }
+
+    /* 반응형 */
+    @media (max-width:620px){
+      .controls{ grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>💜 나만의 플래너 💜</h1>
+  </header>
+
+  <main>
+    <div class="panel">
+      <div class="controls">
+        <div class="left">
+          <label for="title">할 일(제목)</label>
+          <input id="title" type="text" placeholder="예: 수학 문제집 10p 풀기" />
+          <label for="detail">상세 (선택)</label>
+          <textarea id="detail" placeholder="필요하면 자세히 적어보세요..."></textarea>
+        </div>
+
+        <div>
+          <label for="prio">우선순위</label>
+          <select id="prio" style="width:100%; padding:10px; border-radius:10px; border:1px solid rgba(143,92,255,0.12)">
+            <option value="보통">보통</option>
+            <option value="높음">높음</option>
+            <option value="낮음">낮음</option>
+          </select>
+
+          <div style="height:14px"></div>
+          <button class="primary" id="addBtn">플랜 추가하기</button>
+        </div>
+      </div>
+
+      <div class="meta" style="margin-top:18px">
+        <div id="summary">총 플랜: 0 / 완료: 0</div>
+        <div style="font-size:13px;color:var(--muted)">저장: 브라우저 로컬</div>
+      </div>
+
+      <div id="tasks"></div>
+    </div>
+
+    <footer>©2025 나만의 플래너</footer>
+  </main>
+
+  <script>
+    // 요소 참조
+    const titleInput = document.getElementById('title');
+    const detailInput = document.getElementById('detail');
+    const prioSelect = document.getElementById('prio');
+    const addBtn = document.getElementById('addBtn');
+    const tasksContainer = document.getElementById('tasks');
+    const summary = document.getElementById('summary');
+
+    // 로컬 스토리지 키
+    const STORAGE_KEY = 'violetPlannerTasks';
+
+    // 불러오기
+    let tasks = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+
+    // 화면에 렌더
+    function render(){
+      tasksContainer.innerHTML = '';
+      // 최신이 위로 오도록 역순 출력
+      [...tasks].reverse().forEach(task => {
+        const el = createTaskElement(task);
+        tasksContainer.appendChild(el);
+      });
+      updateSummary();
+    }
+
+    // 요약 업데이트
+    function updateSummary(){
+      const total = tasks.length;
+      const done = tasks.filter(t => t.done).length;
+      summary.textContent = `총 플랜: ${total} / 완료: ${done}`;
+    }
+
+    // task 엘리먼트 생성
+    function createTaskElement(task){
+      const wrapper = document.createElement('div');
+      wrapper.className = 'task' + (task.done ? ' done' : '');
+
+      const left = document.createElement('div');
+      left.className = 'left';
+
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.checked = task.done;
+      checkbox.addEventListener('change', () => toggleDone(task.id));
+
+      const content = document.createElement('div');
+      content.className = 'content';
+
+      const title = document.createElement('p');
+      title.className = 'title';
+      title.textContent = task.title;
+
+      const desc = document.createElement('p');
+      desc.className = 'desc';
+      desc.textContent = task.detail || '';
+
+      const meta = document.createElement('div');
+      meta.className = 'meta';
+      meta.textContent = `생성: ${task.createdAt} · 우선순위: ${task.priority}`;
+
+      content.appendChild(title);
+      if (task.detail) content.appendChild(desc);
+      content.appendChild(meta);
+
+      left.appendChild(checkbox);
+      left.appendChild(content);
+
+      const actions = document.createElement('div');
+      actions.className = 'actions';
+
+      const delBtn = document.createElement('button');
+      delBtn.className = 'btn-icon delete';
+      delBtn.title = '삭제';
+      delBtn.innerHTML = '🗑️';
+      delBtn.addEventListener('click', () => removeTask(task.id));
+
+      actions.appendChild(delBtn);
+
+      wrapper.appendChild(left);
+      wrapper.appendChild(actions);
+
+      return wrapper;
+    }
+
+    // 저장(로컬)
+    function save(){
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+      render();
+    }
+
+    // 추가
+    addBtn.addEventListener('click', () => {
+      const title = titleInput.value.trim();
+      const detail = detailInput.value.trim();
+      const priority = prioSelect.value;
+
+      if (!title){
+        alert('할 일을 입력해주세요!');
+        return;
+      }
+
+      const now = new Date();
+      const createdAt = now.toLocaleString('ko-KR', { dateStyle: 'medium', timeStyle: 'short' });
+
+      const task = {
+        id: Date.now().toString(),
+        title,
+        detail,
+        priority,
+        createdAt,
+        done: false
+      };
+
+      tasks.push(task);
+      save();
+
+      // 인풋 초기화
+      titleInput.value = '';
+      detailInput.value = '';
+      prioSelect.value = '보통';
+
+      // 포커스
+      titleInput.focus();
+    });
+
+    // 완료 토글
+    function toggleDone(id){
+      const idx = tasks.findIndex(t => t.id === id);
+      if (idx === -1) return;
+      tasks[idx].done = !tasks[idx].done;
+      save();
+    }
+
+    // 삭제
+    function removeTask(id){
+      if (!confirm('정말 삭제하시겠어요?')) return;
+      tasks = tasks.filter(t => t.id !== id);
+      save();
+    }
+
+    // 초기 렌더
+    render();
+  </script>
+</body>
+</html>
+
